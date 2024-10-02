@@ -38,7 +38,27 @@ def upload_file():
         "labels": ["A", "B", "C", "D"],
         "values": [random.randint(1, 100) for _ in range(4)]
     }
-    return jsonify({'message': 'File uploaded successfully', 'data': processed_data}), 200
+    return (
+        jsonify(
+            {
+                "message": "File uploaded successfully",
+                "session_id": session_id,  # Include session ID in the response
+                "data": processed_data,
+            }
+        ),
+        200,
+    )
+
+@app.route('/data/<session_id>', methods=['GET'])
+def get_graph_data(session_id):
+    # Here you would retrieve the processed data associated with the session_id
+    # This is a mock; implement your actual logic to retrieve the data
+    processed_data = {
+        "labels": ["A", "B", "C", "D"],
+        "values": [random.randint(1, 100) for _ in range(4)]
+    }
+    return jsonify({'data': processed_data}), 200
+
 
 if __name__ == '__main__':
     app.run(debug=True)
