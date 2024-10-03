@@ -1,12 +1,10 @@
 from flask import Flask, request, jsonify, session
 from flask_cors import CORS
-import os
-import time
-import random
-import uuid
+import os, time, random, uuid, base64
+from io import BytesIO
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Required for session management
+app.secret_key = 'mySecret'
 CORS(app)
 
 UPLOAD_FOLDER = 'uploads'
@@ -33,31 +31,32 @@ def upload_file():
     # Simulate processing time
     time.sleep(3)  # Simulate a delay for processing
 
-    # Mock processing result (e.g., data for graphs)
-    processed_data = {
-        "labels": ["A", "B", "C", "D"],
-        "values": [random.randint(1, 100) for _ in range(4)]
-    }
     return (
         jsonify(
             {
                 "message": "File uploaded successfully",
-                "session_id": session_id,  # Include session ID in the response
-                "data": processed_data,
+                "session_id": session_id,
             }
         ),
         200,
     )
 
-@app.route('/data/<session_id>', methods=['GET'])
+
+@app.route("/data/<session_id>", methods=["GET"])
 def get_graph_data(session_id):
-    # Here you would retrieve the processed data associated with the session_id
-    # This is a mock; implement your actual logic to retrieve the data
-    processed_data = {
-        "labels": ["A", "B", "C", "D"],
-        "values": [random.randint(1, 100) for _ in range(4)]
-    }
-    return jsonify({'data': processed_data}), 200
+    image_paths = [
+        "/home/dedsec995/datainsight/new_try/backend/samples/corr.png",
+        "/home/dedsec995/datainsight/new_try/backend/samples/corr.png",
+    ]
+
+    images = []
+
+    for image_path in image_paths:
+        with open(image_path, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
+            images.append(encoded_string)
+
+    return jsonify({"images": images})
 
 
 if __name__ == '__main__':
