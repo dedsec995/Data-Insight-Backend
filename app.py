@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, session
 from flask_cors import CORS
 import os, time, random, uuid, base64
 from io import BytesIO
-from chains import combined_visualizations
+from graphs import combined_visualizations
 
 app = Flask(__name__)
 app.secret_key = "mySecret"
