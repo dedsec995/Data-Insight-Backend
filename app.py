@@ -67,5 +67,29 @@ def get_images(session_id):
     return jsonify({"images": encoded_images}), 200
 
 
+@app.route("/api/suggestions", methods=["GET"])
+def get_suggestions():
+    suggestions = [
+        "",
+        "Consider increasing the batch size",
+        "Experiment with different activation functions",
+        "Add more layers to your neural network",
+        "Implement data augmentation techniques",
+    ]
+    return jsonify({"suggestions": suggestions})
+
+
+@app.route("/api/result/<session_id>", methods=["POST"])
+def get_result(session_id):
+    suggestion = request.json["suggestion"]
+    dummy_images = ["base64_encoded_image_1", "base64_encoded_image_2"]
+    dummy_json_data = {
+        "metric1": 0.85,
+        "metric2": 0.92,
+        "suggestion_applied": suggestion,
+    }
+    return jsonify({"images": dummy_images, "json_data": dummy_json_data})
+
+
 if __name__ == '__main__':
     app.run(debug=True)
