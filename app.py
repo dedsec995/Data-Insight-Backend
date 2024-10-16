@@ -1,8 +1,9 @@
 from flask import Flask, request, jsonify, session
 from flask_cors import CORS
-import os, time, random, uuid, base64
+import os, time, random, uuid, base64, json
 from io import BytesIO
 from graphs import combined_visualizations
+from suggestions import suggestions
 
 app = Flask(__name__)
 app.secret_key = "mySecret"
@@ -67,16 +68,39 @@ def get_images(session_id):
     return jsonify({"images": encoded_images}), 200
 
 
-@app.route("/api/suggestions", methods=["GET"])
-def get_suggestions():
-    suggestions = [
-        "",
-        "Consider increasing the batch size",
-        "Experiment with different activation functions",
-        "Add more layers to your neural network",
-        "Implement data augmentation techniques",
-    ]
-    return jsonify({"suggestions": suggestions})
+@app.route("/api/suggestions/<session_id>", methods=["GET"])
+def get_suggestions(session_id):
+    if not session_id:
+        return jsonify({"error": "No session ID provided"}), 400
+
+    folder_path = os.path.join(UPLOAD_FOLDER, session_id)
+    if not os.path.exists(folder_path):
+        return jsonify({"error": "Invalid session ID"}), 400
+
+    file_path = None
+    for file in os.listdir(folder_path):
+        if file.lower().endswith(".csv"):
+            file_path = os.path.join(folder_path, file)
+            break
+
+    if not file_path:
+        return jsonify({"error": "No CSV file found for this session"}), 400
+
+    try:
+        result = suggestions(file_path)
+        print(result)
+        # return jsonify(
+        #     {
+        #         "suggestions": [
+        #             {"model": "hi", "reason": "reason1"},
+        #             {"model": "bye", "reason": "reason2"},
+        #         ]
+        #     }
+        # )
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 
 @app.route("/api/result/<session_id>", methods=["POST"])

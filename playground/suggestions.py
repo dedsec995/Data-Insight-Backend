@@ -23,7 +23,7 @@ def suggestions(model, df):
         ("system", "You are a data analyst who helps get data insight."),
         (
             "human",
-            "Given the csv. There are {num_columns} number of columns and the {num_rows} number of rows. The file path is {file_path}. The data of csv - {df_string} \n.The target columns is the last column. Write python script to balance the data using smote. Give the entire script together and update in the original csv",
+            "Given the csv. There are {num_columns} number of columns and the {num_rows} number of rows. The file path is {file_path}. The data of csv - {df_string} \n.The target columns is the last column. Give me 3 best suggestions of classical machine learning models you think would be best for this data in a json format model:,reason:",
         ),
     ]
     prompt_template = ChatPromptTemplate.from_messages(messages)

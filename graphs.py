@@ -5,11 +5,9 @@ from langchain.schema.runnable import RunnableParallel, RunnableLambda
 import pandas as pd
 import re, os, subprocess
 
-
 def create_df(file_path):
     df = pd.read_csv(file_path)
     return df
-
 
 def grab_code(result):
     code_pattern = r"```python(.*?)```"
@@ -20,7 +18,6 @@ def grab_code(result):
     else:
         return "No code"
 
-
 def create_python_file(code, main_folder, sub_folder):
     full_path = os.path.join(main_folder, sub_folder)
     os.makedirs(full_path, exist_ok=True)
@@ -28,7 +25,6 @@ def create_python_file(code, main_folder, sub_folder):
     with open(filename, "w") as f:
         f.write(code)
     return filename
-
 
 def run_code(filename):
     try:
@@ -56,6 +52,14 @@ def extract_paths(data, main_folder, sub_folder):
             paths.append(path)
     return list(dict.fromkeys(paths))
 
+def extract_corr_path(result):
+    if not result:
+        return None
+    match = re.search(r"uploads/.*\.png", result)
+    if match:
+        return match.group(0)
+    else:
+        return result
 
 def generate_visualizations(model, df, file_path, main_folder, visualization_type):
     num_rows, num_columns = df.shape
@@ -91,8 +95,9 @@ def generate_visualizations(model, df, file_path, main_folder, visualization_typ
     )
     if visualization_type == "histogram":
         result = extract_paths(result, main_folder, sub_folder)
+    else:
+        result = extract_corr_path(result)
     return result
-
 
 def combined_visualizations(file_path, main_folder):
     df = create_df(file_path)
@@ -109,7 +114,6 @@ def combined_visualizations(file_path, main_folder):
     )
 
     return correlation_result, histogram_result
-
 
 # Usage
 # file_path = "car_kick.csv"  # This will be provided by the user
