@@ -36,7 +36,7 @@ def suggestions(file_path):
         ("system", "You are a data analyst who helps get data insight."),
         (
             "human",
-            "Given the csv. There are {num_columns} number of columns and the {num_rows} number of rows. The file path is {file_path}. The data of csv - {df_string} \n.The target columns is the last column. Give me 3 best suggestions of classical machine learning models you think would be best for this data in a json format suggestions['model':'model1','reason':'reason1']. Only give the json",
+            "Given the csv. There are {num_columns} number of columns and the {num_rows} number of rows. The file path is {file_path}. The data of csv - {df_string} \n.The target columns is the last column. Give me 3 best suggestions of classical machine learning models you think would be best for this data in a json format {{suggestions['model':'model1','reason':'reason1']}}. Only give the json",
         ),
     ]
     prompt_template = ChatPromptTemplate.from_messages(messages)

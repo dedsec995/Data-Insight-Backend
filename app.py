@@ -64,7 +64,6 @@ def get_images(session_id):
     encoded_images = []
 
     for image_path in image_paths:
-        print(f'The dd: {image_path}')
         if os.path.exists(image_path):
             with open(image_path, "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read()).decode("utf-8")

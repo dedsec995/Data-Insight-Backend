@@ -31,7 +31,7 @@ def run_code(filename):
         result = subprocess.run(
             ["python", filename], capture_output=True, text=True, check=True
         )
-        print(f"{filename} executed successfully.")
+        # print(f"{filename} executed successfully.")
         output = result.stdout.strip()
         file_paths = [
             line.strip() for line in output.split("\n") if line.strip().endswith(".png")
@@ -53,7 +53,6 @@ def extract_paths(data, main_folder, sub_folder):
     return list(dict.fromkeys(paths))
 
 def extract_corr_path(result):
-    print(f"Result: {result}")
     if not result:
         return None
     if isinstance(result, list):
@@ -97,14 +96,9 @@ def generate_visualizations(model, df, file_path, main_folder, visualization_typ
         }
     )
     if visualization_type == "histogram":
-        print("Going for hist")
         result = extract_paths(result, main_folder, sub_folder)
     if visualization_type == "correlation":
-        print("Going for corr")
-        try:
-            result = extract_corr_path(result)
-        except Exception as e:
-            print(f"Exception {str(e)}")
+        result = extract_corr_path(result)
     return result
 
 def combined_visualizations(file_path, main_folder):
@@ -117,7 +111,6 @@ def combined_visualizations(file_path, main_folder):
     histogram_result = generate_visualizations(
         model, df, file_path, main_folder, "histogram"
     )
-    print(f"Corr result: {correlation_result}")
     return correlation_result, histogram_result
 
 # Usage
