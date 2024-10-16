@@ -26,7 +26,7 @@ def grab_json(result):
 
 def suggestions(file_path):
     df = create_df(file_path)
-    model = OllamaLLM(model="mistral-nemo")
+    model = OllamaLLM(model="deepseek-coder-v2")
     num_rows = df.shape[0]
     num_columns = df.shape[1]
     first_five = df.head().to_string(index=False)

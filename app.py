@@ -33,9 +33,15 @@ def upload_file():
 
     try:
         corr_result, hist_result = combined_visualizations(filepath, folder_path)
-        all_image_paths = (
-            corr_result + hist_result if isinstance(corr_result, list) else hist_result
-        )
+        all_image_paths = []
+        if isinstance(corr_result, str):
+            all_image_paths.append(corr_result)
+        elif isinstance(corr_result, list):
+            all_image_paths.extend(corr_result)
+        if isinstance(hist_result, list):
+            all_image_paths.extend(hist_result)
+        elif isinstance(hist_result, str):
+            all_image_paths.append(hist_result)
         session['image_paths'] = all_image_paths
         return (
             jsonify(
@@ -58,6 +64,7 @@ def get_images(session_id):
     encoded_images = []
 
     for image_path in image_paths:
+        print(f'The dd: {image_path}')
         if os.path.exists(image_path):
             with open(image_path, "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
@@ -88,15 +95,6 @@ def get_suggestions(session_id):
 
     try:
         result = suggestions(file_path)
-        print(result)
-        # return jsonify(
-        #     {
-        #         "suggestions": [
-        #             {"model": "hi", "reason": "reason1"},
-        #             {"model": "bye", "reason": "reason2"},
-        #         ]
-        #     }
-        # )
         return jsonify(result)
 
     except Exception as e:

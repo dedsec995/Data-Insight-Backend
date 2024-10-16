@@ -53,13 +53,16 @@ def extract_paths(data, main_folder, sub_folder):
     return list(dict.fromkeys(paths))
 
 def extract_corr_path(result):
+    print(f"Result: {result}")
     if not result:
         return None
-    match = re.search(r"uploads/.*\.png", result)
+    if isinstance(result, list):
+        if len(result) == 1 and isinstance(result[0], str):
+            result = result[0]
+    match = re.search(r'(uploads/.+)', result)
     if match:
-        return match.group(0)
-    else:
-        return result
+        return match.group(1).strip()
+    return result
 
 def generate_visualizations(model, df, file_path, main_folder, visualization_type):
     num_rows, num_columns = df.shape
@@ -67,10 +70,10 @@ def generate_visualizations(model, df, file_path, main_folder, visualization_typ
 
     if visualization_type == "correlation":
         sub_folder = "corr"
-        message = f"Given the csv. There are {num_columns} number of columns and the {num_rows} number of rows. The file path is {file_path}. The head of csv - {first_five} \n.The target columns is the last column. Write a python file for correlation heatmap visualization of numeric values. Only save the graph as corr.png. Make sure to use '{os.path.join(main_folder, 'corr')}/' in the file paths when saving the plot. Don't forget to import numpy"
+        message = f"Given the csv. There are {num_columns} number of columns and the {num_rows} number of rows. The file path is {file_path}. The head of csv - {first_five} \n.The target columns is the last column. Write a python script for correlation heatmap visualization of numeric values. Only save the graph as corr.png. Make sure to use '{os.path.join(main_folder, 'corr')}/' in the file paths when saving the plot. Don't forget to import. Just print the file path created"
     elif visualization_type == "histogram":
         sub_folder = "hist"
-        message = f"Given the csv. There are {num_columns} number of columns and the {num_rows} number of rows. The file path is {file_path}. The head of csv - {first_five} \n.The target columns is the last column. Write a python file to create different histogram graphs of all features you think are important for visualization. Save all the graphs as png files inside the '{os.path.join(main_folder, 'hist')}/' folder. Keep a list of the file paths created and print it. Make sure to use '{os.path.join(main_folder, 'hist')}/' in the file paths when saving the plots."
+        message = f"Given the csv. There are {num_columns} number of columns and the {num_rows} number of rows. The file path is {file_path}. The head of csv - {first_five} \n.The target columns is the last column. Write a python script to create different histogram graphs of all features you think are important for visualization. Save all the graphs as png files inside the '{os.path.join(main_folder, 'hist')}/' folder. Keep a list of the file paths created and print it. Make sure to use '{os.path.join(main_folder, 'hist')}/' in the file paths when saving the plots."
 
     messages = [
         ("system", "You are a data analyst who helps get data insight."),
@@ -94,25 +97,27 @@ def generate_visualizations(model, df, file_path, main_folder, visualization_typ
         }
     )
     if visualization_type == "histogram":
+        print("Going for hist")
         result = extract_paths(result, main_folder, sub_folder)
-    else:
-        result = extract_corr_path(result)
+    if visualization_type == "correlation":
+        print("Going for corr")
+        try:
+            result = extract_corr_path(result)
+        except Exception as e:
+            print(f"Exception {str(e)}")
     return result
 
 def combined_visualizations(file_path, main_folder):
     df = create_df(file_path)
-    model = OllamaLLM(model="mistral-nemo")
-
-    # Create main folder
+    model = OllamaLLM(model="deepseek-coder-v2")
     os.makedirs(main_folder, exist_ok=True)
-
     correlation_result = generate_visualizations(
         model, df, file_path, main_folder, "correlation"
     )
     histogram_result = generate_visualizations(
         model, df, file_path, main_folder, "histogram"
     )
-
+    print(f"Corr result: {correlation_result}")
     return correlation_result, histogram_result
 
 # Usage
