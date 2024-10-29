@@ -1,9 +1,11 @@
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify, session, send_file
 from flask_cors import CORS
 import os, time, random, uuid, base64, json
 from io import BytesIO
 from graphs import combined_visualizations
 from suggestions import suggestions
+from model_creation import create_model
+import pickle, re
 
 app = Flask(__name__)
 app.secret_key = "mySecret"
@@ -11,7 +13,19 @@ CORS(app, supports_credentials=True)
 
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
+dummy_data = {
+    "model_path": "/home/dedsec995/datainsight/backend/playground/model/loan_decision_tree_model.pkl",
+    "conf_path": "/home/dedsec995/datainsight/backend/playground/model/loan_confusion_matrix.png",
+    "result": {
+        "accuracy": 0.89505,
+        "recoil": 0.89505,
+        "precision": 0.8982837829034723,
+        "f1": 0.8965567235596356,
+        "support": 20000.0,
+    },
+}
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
@@ -102,15 +116,58 @@ def get_suggestions(session_id):
 
 @app.route("/api/result/<session_id>", methods=["POST"])
 def get_result(session_id):
+    # In a real application, you might use the session_id and suggestion
+    # to retrieve or process data. For this example, we'll ignore them.
     suggestion = request.json["suggestion"]
-    dummy_images = ["base64_encoded_image_1", "base64_encoded_image_2"]
-    dummy_json_data = {
-        "metric1": 0.85,
-        "metric2": 0.92,
-        "suggestion_applied": suggestion,
+    folder_path = os.path.join(UPLOAD_FOLDER, session_id)
+
+    if not os.path.exists(folder_path):
+        return jsonify({"error": "Invalid session ID"}), 400
+
+    file_path = None
+    for file in os.listdir(folder_path):
+        if file.lower().endswith(".csv"):
+            file_path = os.path.join(folder_path, file)
+            break
+
+    result = create_model(file_path,folder_path,suggestion)
+
+    if result is None:
+        return jsonify({"error": "Result is None"}), 400
+    json_match = re.search(r"\{.*\}", result, re.DOTALL)
+    if not json_match:
+        return jsonify({"error": "No JSON data found in the output"}), 400
+
+    try:
+        data = json.loads(json_match.group(0))
+    except json.JSONDecodeError:
+        return jsonify({"error": "Invalid JSON data in the output"}), 400
+    try:
+        conf_path = data.get('conf_path')
+    except:
+        print("Conf path not found")
+        conf_path = None
+    try:
+        with open(conf_path, "rb") as image_file:
+            encoded_image = base64.b64encode(image_file.read()).decode("utf-8")
+    except FileNotFoundError:
+        print(f"Confusion matrix image not found at {conf_path}"),
+    except Exception as e:
+        print(f"Error reading confusion matrix image: {str(e)}")
+
+    response_data = {
+        "model_path": data.get("model_path"),
+        "conf_image": encoded_image,
+        "result": data.get("result"),
     }
-    return jsonify({"images": dummy_images, "json_data": dummy_json_data})
+    return jsonify(response_data)
+
+
+@app.route("/api/download_model/<session_id>", methods=["GET"])
+def download_model(session_id):
+    # In a real application, you might use the session_id to authorize the download
+    return send_file(dummy_data["model_path"], as_attachment=True)
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
