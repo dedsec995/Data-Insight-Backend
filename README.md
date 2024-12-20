@@ -2,6 +2,9 @@
 
 Data Insight is a web application designed to help data analysts and scientists generate insights from CSV data files. It uses AI to visualize data, suggest the best machine learning models, and assist in the creation of these models. The app leverages powerful tools like the Deepseek-Coder-V2 model, hosted via Ollama, and integrates with LangChain to help automate data analysis tasks.
 
+## Demo
+![Data Insight Demo](assets/demo.mp4)
+
 ## Tech Stack
 - **Backend**: Python (Flask)
 - **Frontend**: React.js
@@ -97,6 +100,14 @@ The frontend server will start and listen on `http://localhost:3000` by default.
 
 ### 4. Run the Application
 Make sure both the backend and frontend servers are running. Open a browser and navigate to `http://localhost:3000` to start using the Data Insight application.
+
+## Screenshots
+### Data Visualization
+![Data Visualization](assets/graph.png)
+
+### Model
+![Result](assets/result.png)
+
 
 ## Usage
 - Upload a CSV file for analysis.
